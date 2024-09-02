@@ -86,7 +86,7 @@ def _remove_project_lien(project_id):
   """
 
   # Build the Cloud Resource Manager API client
-  lien_service = build('cloudresourcemanager', 'v3')
+  lien_service = build('cloudresourcemanager', 'v3', cache_discovery=False)
   parent = f"projects/{project_id}"
   request = lien_service.liens().list(parent=parent)
 
