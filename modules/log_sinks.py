@@ -1,3 +1,7 @@
+# pylint: disable=logging-fstring-interpolation,f-string-without-interpolation,consider-using-f-string
+"""
+  Deletes all log sinks created at folder and organization level
+"""
 import logging
 from google.cloud import logging_v2
 
@@ -15,7 +19,7 @@ def delete(cai_client, organization_id, exclude_log_sinks, dry_run):
         dry_run (bool, optional): If True, only simulate the deletions without actually performing them. Default is False.
     """
 
-  logger.info(f"Starting processing log sinks")
+  logger.info("Starting processing log sinks")
 
   exclude_log_sinks = exclude_log_sinks.split(",") if exclude_log_sinks else []
   log_sinks_list = [

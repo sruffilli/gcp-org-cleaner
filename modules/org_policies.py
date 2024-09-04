@@ -1,3 +1,7 @@
+# pylint: disable=logging-fstring-interpolation,f-string-without-interpolation,consider-using-f-string
+"""
+  Deletes all org policies at folder and organization level
+"""
 import logging
 from google.cloud import orgpolicy_v2
 

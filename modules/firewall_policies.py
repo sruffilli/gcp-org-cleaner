@@ -1,3 +1,7 @@
+# pylint: disable=logging-fstring-interpolation,f-string-without-interpolation,consider-using-f-string
+"""
+  Deletes firewall policies for an organization.
+"""
 import logging
 from google.cloud import compute_v1
 
@@ -13,7 +17,7 @@ def delete(cai_client, organization_id, dry_run):
         organization_id (str): The ID of the organization.
         dry_run (bool, optional): If True, only simulate the deletions without actually performing them. Default is False.
     """
-  logger.info(f"Starting processing firewall policies")
+  logger.info("Starting processing firewall policies")
 
   fw_policy_list = _list_fw_policies(cai_client, organization_id)
 
@@ -26,21 +30,20 @@ def delete(cai_client, organization_id, dry_run):
         "//compute.googleapis.com/locations/global/firewallPolicies/", "")
 
     for association in policy.get('associations', []):
-      _delete_policy_association(
-          fw_policy_client, policy_id, association, dry_run=dry_run)
-    log_message = "%sDeleting firewall policy key %s." % ("(Simulated) " if dry_run else "",
-                                                          policy_id)
+      _delete_policy_association(fw_policy_client, policy_id, association,
+                                 dry_run=dry_run)
+    log_message = "%sDeleting firewall policy key %s." % (
+        "(Simulated) " if dry_run else "", policy_id)
     logger.info(log_message)
 
     if not dry_run:
-      fw_policy_client.delete(
-          request=compute_v1.DeleteFirewallPolicyRequest(
-              firewall_policy=policy_id,))
+      fw_policy_client.delete(request=compute_v1.DeleteFirewallPolicyRequest(
+          firewall_policy=policy_id,))
 
   if not dry_run:
     logger.info(f"{len(fw_policy_list)} policy/ies deleted.")
 
-  logger.info(f"Done processing firewall policies")
+  logger.info("Done processing firewall policies")
 
 
 def _list_fw_policies(cai_client, organization_id):
@@ -89,8 +92,8 @@ def _delete_policy_association(fw_policy_client, policy_id, association,
         association (str): The name of the association to delete.
         dry_run (bool, optional): If True, only simulate the deletion without actually performing it. Default is False.
     """
-  log_message = "%sDeleting firewall policy association %s for policy %s." % ("(Simulated) " if dry_run else "",
-                                                                              association, policy_id)
+  log_message = "%sDeleting firewall policy association %s for policy %s." % (
+      "(Simulated) " if dry_run else "", association, policy_id)
   logger.info(log_message)
 
   request = compute_v1.RemoveAssociationFirewallPolicyRequest(

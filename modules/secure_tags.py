@@ -1,3 +1,7 @@
+# pylint: disable=logging-fstring-interpolation,f-string-without-interpolation,consider-using-f-string
+"""
+  Deletes all secure tags which exist within an organization.
+"""
 import logging
 from google.cloud import resourcemanager_v3
 
@@ -118,7 +122,7 @@ def _delete_tag_value(cai_client, organization_id, tag_value, dry_run):
   list(cai_bindings_response)
 
   for binding in cai_bindings_response:
-    _delete_bindings_for_value(cai_client, binding.name, dry_run)
+    _delete_bindings_for_value(binding.name, dry_run)
 
   log_message = "%sDeleting secure tag value %s." % ("(Simulated) " if dry_run
                                                      else "", tag_value)
@@ -146,7 +150,7 @@ def _delete_tag_key(tag_key, dry_run):
     tagkey_client.delete_tag_key(name=tag_key)
 
 
-def _delete_bindings_for_value(cai_client, resource_name, dry_run):
+def _delete_bindings_for_value(resource_name, dry_run):
   """
     Delete tag bindings associated with a specific resource.
 
