@@ -12,52 +12,54 @@ from googleapiclient.discovery import build
 logger = logging.getLogger("default")
 
 
-def delete(organization_id, exclude_projects, dry_run):
+def delete(folders_list, exclude_projects, dry_run):
   """
   Delete projects within the specified organization, including any existing liens.
 
   Parameters:
       organization_id (str): The ID of the organization.
+      folders_list (list): List of folder objects to process for project deletion.
       exclude_projects(str): Comma-separated list of project IDs to exclude from deletion.
       dry_run (bool, optional): If True, only simulate the deletions without actually performing them. Default is False.
   """
   logger.info("Starting processing projects")
 
-  project_list = _list_projects(organization_id)
-  project_list = [p for p in project_list]
-  logger.info(f"Retrieved {len(project_list)} project(s)")
-
-  project_client = resourcemanager_v3.ProjectsClient()
-
   exclude_projects_list = exclude_projects.split(
       ",") if exclude_projects else []
+  project_client = resourcemanager_v3.ProjectsClient()
 
-  for project in project_list:
-    project_id = project.project_id
+  for folder in reversed(folders_list):
+    project_list = _list_projects(folder.name)
+    logger.info(
+        f"Retrieved {len(list(project_list))} project(s) under folder {folder.name}"
+    )
 
-    if not project_id in exclude_projects_list:
-      log_message = "%sDeleting project %s." % ("(Simulated) "
-                                                if dry_run else "", project_id)
-      logger.info(log_message)
+    for project in project_list:
+      project_id = project.project_id
 
-      if not dry_run:
-        _delete_project(project_client, project_id)
+      if project_id not in exclude_projects_list:
+        log_message = "%sDeleting project %s." % ("(Simulated) " if dry_run else
+                                                  "", project_id)
+        logger.info(log_message)
+
+        if not dry_run:
+          _delete_project(project_client, project_id)
 
   logger.info("Done processing projects")
 
 
-def _list_projects(organization_id: str) -> ListProjectsPager:
+def _list_projects(folder_name: str) -> ListProjectsPager:
   """
-  Lists projects within the specified organization
+  Lists projects within the specified folder.
 
   Args:
-      organization_id: GCP organization ID
+      folder_name: GCP folder name in the format 'folders/{folder_id}'
 
   Returns: A pager for traversing through the projects
   """
   client = resourcemanager_v3.ProjectsClient()
   request = SearchProjectsRequest(
-      query=f"parent.id:{organization_id} state:ACTIVE",)
+      query=f"parent.id:{folder_name.split('/')[-1]} state:ACTIVE",)
   projects = client.search_projects(request=request)
   return projects
 

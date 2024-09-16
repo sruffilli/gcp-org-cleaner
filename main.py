@@ -4,7 +4,7 @@
 import logging
 import click
 from google.cloud import asset
-from modules import firewall_policies, log_sinks, org_policies, secure_tags, custom_roles, projects, folders
+from modules import firewall_policies, log_sinks, org_policies, secure_tags, custom_roles, projects, folders, utils
 
 # Set up logging configuration
 logger = logging.getLogger("default")
@@ -73,6 +73,13 @@ def main(organization_id, dry_run, exclude_customroles, exclude_log_sinks,
       only_securetags, only_projects, only_folders
   ])
 
+  folder_list = []
+  requires_folder_list = any([only_folders, only_projects, only_fwpolicies
+                             ]) or delete_all
+  exclude_folders = exclude_folders if exclude_folders is not None else []
+  if requires_folder_list:
+    folder_list = utils.list_all_folders(organization_id, exclude_folders)
+
   cai_client = asset.AssetServiceClient()
 
   if delete_all or only_customroles:
@@ -91,10 +98,10 @@ def main(organization_id, dry_run, exclude_customroles, exclude_log_sinks,
     secure_tags.delete(cai_client, organization_id, dry_run)
 
   if delete_all or only_projects:
-    projects.delete(organization_id, exclude_projects, dry_run)
+    projects.delete(folder_list, exclude_projects, dry_run)
 
   if delete_all or only_folders:
-    folders.delete(organization_id, exclude_folders, dry_run)
+    folders.delete(folder_list, dry_run)
 
 
 if __name__ == "__main__":
