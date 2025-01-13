@@ -60,7 +60,7 @@ done
 To use GCP Organization Cleaner run:
 
 ```bash
-python org_cleaner.py <organization_id> [options]
+python main.py <organization_id> [options]
 ```
 
 Replace <organization_id> with the ID of the target GCP organization.
@@ -85,29 +85,29 @@ Examples
 Delete all types of resources within the organization:
 
 ```bash
-python org_cleaner.py <organization_id>
+python main.py <organization_id>
 ```
 
 Delete only organization policies and log sinks (dry-run):
 
 ```bash
-python org_cleaner.py <organization_id> --dry-run --only-orgpolicies --only-logsinks
+python main.py <organization_id> --dry-run --only-orgpolicies --only-logsinks
 ```
 
 Delete log sinks, with exceptions:
 
 ```bash
-python org_cleaner.py <organization_id> --exclude-log-sinks=<sink1,sink2> --only-logsinks
+python main.py <organization_id> --exclude-log-sinks=<sink1,sink2> --only-logsinks
 ```
 
 Exclude specific custom roles
 
 ```bash
-python org_cleaner.py <organization_id> --exclude-custom-roles='organizations/123456789/roles/CustomRole1,organizations/123456789/roles/CustomRole2' --only-customroles
+python main.py <organization_id> --exclude-custom-roles='organizations/123456789/roles/CustomRole1,organizations/123456789/roles/CustomRole2' --only-customroles
 ```
 
 Exclude specific projects
 
 ```bash
-python org_cleaner.py <organization_id> --exclude-projects='project-1,project-2' --only-projects
+python main.py <organization_id> --exclude-projects='project-1,project-2' --only-projects
 ```
