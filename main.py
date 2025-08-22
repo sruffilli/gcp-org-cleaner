@@ -23,7 +23,7 @@ logging.root.setLevel(logging.INFO)
 )
 @click.option(
     "--exclude-folders",
-    help="Folders to exclude, in 'folders/{folder_id}' format, comma separated."
+    help="Folders to exclude, in 'folders/{folder_id}' format, comma separated. If set, also projects and fwpolicies within the excluded folder hierarchy won't be deleted."
 )
 @click.option(
     "--exclude-log-sinks", help=
@@ -31,7 +31,7 @@ logging.root.setLevel(logging.INFO)
 )
 @click.option(
     "--exclude-projects", help=
-    "Log sinks to exclude in '{organizations,folders}/{id}/sinks/{sink_name}' format, comma separated."
+    "Projects to exclude by project ID, comma-separated."
 )
 @click.option("--only-customroles", is_flag=True,
               help="Only delete custom roles.")
@@ -76,9 +76,11 @@ def main(organization_id, dry_run, exclude_customroles, exclude_log_sinks,
   folder_list = []
   requires_folder_list = any([only_folders, only_projects, only_fwpolicies
                              ]) or delete_all
-  exclude_folders = exclude_folders if exclude_folders is not None else []
+  exclude_folders_list = exclude_folders.split(',') if exclude_folders else []
   if requires_folder_list:
-    folder_list = utils.list_all_folders(organization_id, exclude_folders)
+    unfiltered_folder_list = utils.list_all_folders(organization_id, exclude_folders_list)
+    folder_list = [f for f in unfiltered_folder_list if f.name not in exclude_folders_list]
+
 
   cai_client = asset.AssetServiceClient()
 
