@@ -26,8 +26,7 @@ def delete(cai_client, organization_id, dry_run):
   logger.info(f"Retrieved {len(fw_policy_list)} policy/ies")
 
   for policy in fw_policy_list:
-    policy_id = policy['name'].replace(
-        "//compute.googleapis.com/locations/global/firewallPolicies/", "")
+    policy_id = policy['id']
 
     for association in policy.get('associations', []):
       _delete_policy_association(fw_policy_client, policy_id, association,
@@ -56,7 +55,7 @@ def _list_fw_policies(cai_client, organization_id):
 
     Returns:
         list: A list of dictionaries containing firewall policy information.
-              Each dictionary has the following keys: 'name' and 'associations'.
+              Each dictionary has the following keys: 'name', 'id', and 'associations'.
     """
   ret = []
 
@@ -70,13 +69,19 @@ def _list_fw_policies(cai_client, organization_id):
   list(results_iterator)
 
   for resource in results_iterator:
-    associations = resource.versioned_resources[0].resource.get(
-        'associations', [])
+    resource_data = resource.versioned_resources[0].resource
+    associations = resource_data.get('associations', [])
+    policy_id = resource_data.get('id')
 
-    ret.append({
-        "name": resource.name,
-        "associations": [association['name'] for association in associations]
-    })
+    if policy_id:
+        ret.append({
+            "name": resource.name,
+            "id": policy_id,
+            "associations": [association['name'] for association in associations]
+        })
+    else:
+        logger.warning(f"Could not find ID for firewall policy {resource.name}, skipping.")
+
 
   return ret
 
